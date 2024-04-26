@@ -1,0 +1,308 @@
+<!-- views/home.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Home</title>
+    <link rel="stylesheet" href="/CSS/home.css">
+    <script src="https://cdn.lordicon.com/lordicon.js"></script>
+</head>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    if (!localStorage.getItem("user-token")){
+        window.location.href = "/"
+    }else{
+        const getEvents = async ()=>{
+            $.ajax({
+            url: "/api/user/events",
+            method: "GET",
+            headers: {
+                "user-token": localStorage.getItem("user-token")
+            },
+            success: function(response) {
+                if (response.success) {
+                    const events = response.events;
+                    for (let i=0; i<events.length; i++){
+                        if (events[i].weather){
+                        let eventHtml = `
+                        <div class="event" id=event-${events[i].id}>
+                            <h3>${events[i].eventName}</h3>
+                            <p>Date: ${events[i].datetime.slice(0, 10)}</p>
+                            <p>Time: ${events[i].datetime.slice(11, 19)}</p>
+                            <p>Location: ${events[i].location}</p>
+                            <p>Weather: ${events[i].weather}</p>
+                            <p>Details: ${events[i].details}</p>`;
+                        if (response.userId==events[i].userId){
+                            eventHtml += `<button onClick="toggleEditEventForm(${events[i].id})">Edit</button> <button onClick="deleteEvent(${events[i].id})">Delete</button></div>`
+                        }else{
+                            eventHtml += "</div>"
+                        }
+                        $('.events-section').append(eventHtml);
+                    }  else{
+                        let eventHtml = `
+                        <div class="event" id=event-${events[i].id}>
+                            <h3>${events[i].eventName}</h3>
+                            <p>Date: ${events[i].datetime.slice(0, 10)}</p>
+                            <p>Time: ${events[i].datetime.slice(11, 19)}</p>
+                            <p>Location: ${events[i].location}</p>
+                            <p>Details: ${events[i].details}</p>`
+                        ;
+                        if (response.userId==events[i].userId){
+                            eventHtml += `<button onClick="toggleEditEventForm(${events[i].id})">Edit</button> <button onClick="deleteEvent(${events[i].id})">Delete</button></div>`
+                        }else{
+                            eventHtml += "</div>"
+                        }
+                        $('.events-section').append(eventHtml); 
+                    }
+                    }
+                }
+            },
+            error: function(xhr, status, error) {
+                alert("Error: " + error);
+            }
+            
+        });
+        }
+        const getUser = async ()=>{
+                $.ajax({
+                url: "/api/user",
+                method: "GET",
+                headers: {
+                    "user-token": localStorage.getItem("user-token")
+                },
+                success: function(response) {
+                    if (response.success) {
+                        const user = response.user;
+                        let header = `<h1>Welcome, ${user.name}</h1>`
+                        $(".head").append(header);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    alert("Error: " + error);
+                }
+                
+            });
+        }
+        getUser();
+        getEvents()
+    }
+</script>
+<body>
+    <header>
+        <center> <lord-icon src="https://cdn.lordicon.com/wwmtsdzm.json" trigger="loop" delay="1500" style="width:200px;height:200px">
+</lord-icon></center>
+        <div class="head"></div>
+        <button onclick="logOut()" class="logout-btn">Logout</button>
+    </header>
+    <main>
+        <section class="events-section">
+            <h2><i>Events</i><script src="https://cdn.lordicon.com/lordicon.js"></script>
+                <lord-icon
+                    src="https://cdn.lordicon.com/wzwygmng.json"
+                    trigger="loop"
+                    delay="1000"
+                    style="width:25px;height:25px">
+                </lord-icon></h2>
+            <!-- Display events here -->
+            
+        </section>
+        <div id="editEventForm" class="edit-event-form">
+            <button onclick="toggleEditEventForm(null)" class="close-btn">&times;</button>
+            <h2>Edit Edit</h2>
+            
+        </div>
+        <section class="create-event-section">
+            <h2><i>Create Event</i> <lord-icon src="https://cdn.lordicon.com/wuvorxbv.json" trigger="loop" delay="1000" style="width:30px;height:30px"> </lord-icon></h2>
+            
+            <div>
+                <div class="form-group">
+                    <label for="eventName"><i>Event Name</i><script src="https://cdn.lordicon.com/lordicon.js"></script>
+                        <lord-icon
+                            src="https://cdn.lordicon.com/pbbsmkso.json"
+                            trigger="loop"
+                            delay="1000"
+                            style="width:25px;height:25px">
+                        </lord-icon></label>
+                    <input type="text" id="eventName" name="eventName" required>
+                </div>
+                <div class="form-group">
+                    <label for="eventDate"><i>Event Date</i><script src="https://cdn.lordicon.com/lordicon.js"></script>
+                        <lord-icon
+                            src="https://cdn.lordicon.com/bvdrirjp.json"
+                            trigger="loop"
+                            delay="1000"
+                            style="width:25px;height:25px">
+                        </lord-icon></label>
+                    <input type="date" id="eventDate" name="eventDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="eventTime"><i>Event Time</i><script src="https://cdn.lordicon.com/lordicon.js"></script>
+                        <lord-icon
+                            src="https://cdn.lordicon.com/qvyppzqz.json"
+                            trigger="loop"
+                            delay="1000"
+                            style="width:23px;height:23px">
+                        </lord-icon></label>
+                    <input type="time" id="eventTime" name="eventTime" required>
+                </div>
+                <div class="form-group">
+                    <label for="eventLocation"><i>Event Location (City)</i> <script src="https://cdn.lordicon.com/lordicon.js"></script>
+                        <lord-icon
+                            src="https://cdn.lordicon.com/surcxhka.json"
+                            trigger="loop"
+                            delay="1000"
+                            style="width:25px;height:25px">
+                        </lord-icon></label>
+                    <input type="text" id="eventLocation" name="eventLocation" required>
+                </div>
+                <div class="form-group">
+                    <label for="eventLocation"><i>Event Details</i><script src="https://cdn.lordicon.com/lordicon.js"></script>
+                        <lord-icon
+                            src="https://cdn.lordicon.com/ozmbktct.json"
+                            trigger="loop"
+                            delay="1000"
+                            style="width:26px;height:26px">
+                        </lord-icon></label>
+                    <input type="text" id="eventDetails" name="eventDetails">
+                </div>
+                <button onclick="createCustomEvent()"><i>Create Event</i></button>
+            </div>
+        </section>
+    </canvas>
+    </main>
+</body>
+<script>
+    function logOut(){
+        localStorage.setItem("user-token", "")
+        window.location.href = "/"
+    }
+    async function createCustomEvent(){
+        const eventName = document.getElementById("eventName").value;
+        const datetime = document.getElementById("eventDate").value + "T" + document.getElementById("eventTime").value + ":00"
+        const location = document.getElementById("eventLocation").value;
+        const details = document.getElementById("eventDetails").value;
+        $.ajax({
+            url: "/api/events",
+            method: "POST",
+            headers: {
+                "Content-type": "application/json",
+                "user-token": localStorage.getItem("user-token")
+            }, 
+            data: JSON.stringify({eventName, datetime, location, details}),
+            success: function(response) {
+                if (response.success) {
+                    const newEvent = response.event;
+                    if (newEvent.weather){
+                        const eventHtml = `
+                        <div class="event">
+                            <h3>${newEvent.eventName}</h3>
+                            <p>Date: ${newEvent.datetime.slice(0, 10)}</p>
+                            <p>Time: ${newEvent.datetime.slice(11, 19)}</p>
+                            <p>Location: ${newEvent.location}</p>
+                            <p>Weather: ${newEvent.weather}</p>
+                            <p>Details: ${newEvent.details}</p>
+                            <button onClick="toggleEditEventForm(${newEvent.id})">Edit</button> <button onClick="deleteEvent(${newEvent.id})">Delete</button>
+                        </div>`;
+                        $('.events-section').append(eventHtml);
+                    }  else{
+                        const eventHtml = `
+                        <div class="event">
+                            <h3>${newEvent.eventName}</h3>
+                            <p>Date: ${newEvent.datetime.slice(0, 10)}</p>
+                            <p>Time: ${newEvent.datetime.slice(11, 19)}</p>
+                            <p>Location: ${newEvent.location}</p>
+                            <p>Details: ${newEvent.details}</p>
+                            <button onClick="toggleEditEventForm(${newEvent.id})">Edit</button> <button onClick="deleteEvent(${newEvent.id})">Delete</button>
+                        </div>`;
+                        $('.events-section').append(eventHtml);
+                    } 
+                    
+                    alert(response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                alert("Error: " + error);
+            }
+        });
+    }
+    async function deleteEvent(id){
+        $.ajax({
+            url: `/api/user/events/${id}`,
+            method: "DELETE",
+            headers: {
+                "user-token": localStorage.getItem("user-token")
+            },
+            success: function(response) {
+                console.log(response)
+                if (response.success) {
+                    $(`#event-${id}`).remove();
+                }
+                window.alert(response.message);
+            },
+            error: function(xhr, status, error) {
+                console.log(`/api/user/events/${id}`)
+                console.error('Error approving event:', error);
+                window.alert('An error occurred while deleting the event.');
+            }
+        });
+    }
+
+    async function toggleEditEventForm(id) {
+        var form = document.getElementById("editEventForm");
+        if (id === null) {
+            form.removeChild(document.getElementsByClassName("edit-event-div")[0])
+            form.style.display = "none";
+        } else {
+            form.style.display = "block";
+            $.ajax({
+                url: `/api/user/event/${id}`,
+                "method": "GET", 
+                "headers": {
+                    "user-token": localStorage.getItem("user-token")
+                },
+                success: function(response) {
+                if (response.success) {
+                    const event = response.event;
+                    const eventHtml = `<div class="edit-event-div">
+                    <label for="eventName">Event Name</label>
+                    <input type="text" id="eventName-edit" name="eventName" value="${event.eventName}" required>
+                    <label for="eventDate">Event Date</label>
+                    <input type="date" id="eventDate-edit" name="eventDate" value=${event.datetime.slice(0, 10)} required>
+                    <label for="eventTime">Event Time</label>
+                    <input type="time" id="eventTime-edit" name="eventTime" value=${event.datetime.slice(11, 19)} required>
+                    <label for="eventLocation">Event Location (City)</label>
+                    <input type="text" id="eventLocation-edit" name="eventLocation" value="${event.location}" required>
+                    <label for="eventLocation">Event Details</label>
+                    <input type="text" id="eventDetails-edit" name="eventDetails" value="${event.details}">
+                    <button onclick="editEvent(${event.id})">Edit Event</button></div>`
+                    $(".edit-event-form").append(eventHtml)
+                }
+            },
+            error: function(xhr, status, error) {
+                alert("Error: " + error);
+            }
+            })
+            
+        }
+    }
+
+    async function editEvent(id){
+        const eventName = document.getElementById("eventName-edit").value;
+        const datetime = document.getElementById("eventDate-edit").value + "T" + document.getElementById("eventTime-edit").value
+        const location = document.getElementById("eventLocation-edit").value;
+        const details = document.getElementById("eventDetails-edit").value;
+        console.log(JSON.stringify({eventName, datetime, location, details}))
+        const response = await fetch(`/api/events/${id}`, {
+            method: "PUT",
+            headers: {
+                "Content-type": "application/json",
+                "user-token": localStorage.getItem("user-token")
+            },
+            body: JSON.stringify({eventName, datetime, location, details})
+        })
+        const json = await response.json();
+        window.alert(json.message);
+    }
+</script>
+</html>
